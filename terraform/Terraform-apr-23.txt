@@ -1,0 +1,253 @@
+Terraform:
+----------------------------------------------------------------------------------------------------------
+20-09-2023 Class - 1
+----------------------------------------------------------------------------------------------------------
+Installation:
+
+1. Download the executable file from terraform website --> https://www.terraform.io/
+
+2. Extract the executable and keep it in some folder 
+
+3. Add the path of the executable file to the environment variable in windows.
+
+terraform --version --> To check terraform version
+----------------------------------------------------------------------------------------------------------
+
+Infrastructure As Code [ IAC ]: 
+
+Terraform: 
+HCL - Hashicorp Configuration Language
+
+Extension - .tf 
+
+Advantages: 
+1. Plannability 
+2. Resuability
+3. Maintainability 
+----------------------------------------------------------------------------------------------------------
+22-09-2023 Class - 2
+----------------------------------------------------------------------------------------------------------
+Terraform Lifecycle or Terraform Phases: 
+
+1. terraform init 
+
+Terraform init operations:
+a. Initializes the backend
+b. Initializes the provider plugin
+c. Initializes the child modules 
+
+Providers:
+
+syntax: 
+
+provider "aws" {
+    region = "ap-south-1"
+    access_key = 'aws_access_key'
+    secret_key = 'aws_secret_key'
+}
+----------------------------------------------------------------------------------------------------------
+2. terraform plan 
+
+commands: 
+
+terraform plan --> To create an execution plan
+terraform plan -out <file_name> --> To save a terraform plan file that can be applied 
+
+----------------------------------------------------------------------------------------------------------
+3. terraform apply 
+
+commands:
+
+terraform apply --> To apply terraform configuration files
+terrafrom apply --auto-approve --> To make changes without the need to approve 
+terraform apply <plan_file> --> To apply a particular plan file 
+
+----------------------------------------------------------------------------------------------------------
+4. terraform destroy 
+
+commands:
+
+terraform destroy --> To destroy the Infrastructure
+terraform destroy --auto-approve --> To destroy resources without approval
+terraform destroy -target=<resource_type>.<resource_name> --> To delete a particular resource 
+ex: terrafrom destroy -target=aws_instance.terraform-instance-2
+terraform plan -destroy --> To see the destroy plan 
+
+----------------------------------------------------------------------------------------------------------
+5. terraform validate 
+----------------------------------------------------------------------------------------------------------
+Input Variables:
+
+synatx: 
+
+variable "<variable-name>" {
+    description = "< information about variable>"
+    type = "<string,list,integer,boolean>"
+    default = "<The value to be passes to the resource>"
+}
+----------------------------------------------------------------------------------------------------------
+Output values: 
+
+synatx: 
+
+output "<output_name>" {
+    value = <resource_type>.<resource_name>.<value>
+}
+----------------------------------------------------------------------------------------------------------
+23-09-2023 Class - 3
+----------------------------------------------------------------------------------------------------------
+VPC Creation:
+----------------------------------------------------------------------------------------------------------
+Resource dependency:
+
+synatx: 
+
+depends_on = [ <resource_type>.<resource_name> ]
+----------------------------------------------------------------------------------------------------------
+Data Source:
+
+synatx: 
+
+data "resource_type" "resource_name" {
+    #identifier
+    instance_tags = {
+      "Name" = "k8s"
+    }
+}
+----------------------------------------------------------------------------------------------------------
+26-09-2023 Class - 4
+----------------------------------------------------------------------------------------------------------
+count and for_each
+
+resource "aws_instance" "terrrafom-instance-1" {
+    ami = "ami-0f5ee92e2d63afc18"
+    instance_type = "t2.micro"
+    key_name= "devops"
+    count = 3 
+    tags = {
+        "Name" = "server ${count.index}"
+    }
+}
+----------------------------------------------------------------------------------------------------------
+Assignment:
+create multiple instances using "for_each"
+----------------------------------------------------------------------------------------------------------
+Terraform Provisioners:
+
+1. file: 
+
+syntax: 
+
+resource "aws_instance" "<resource_name>" {
+    <creation_details>
+    <connection_block>
+
+    Provisioner "file" {
+        source = "<path-of-the-file>"
+        destination = "<destination_path>"
+    }
+}
+----------------------------------------------------------------------------------------------------------
+2. local-exec: 
+
+resource "aws_instance" "<resource_name>" {
+    <creation_details>
+    <connection_block>
+
+    Provisioner "local-exec" {
+        command = "command-to-be-executed"
+        interpreter = [ "bash", "-c" ]
+    }
+}
+----------------------------------------------------------------------------------------------------------
+3. remote-exec:
+
+a. inline - 
+b. script -
+c. scripts - 
+
+resource "aws_instance" "<resource_name>" {
+    <creation_details>
+    <connection_block>
+
+    Provisioner "remote-exec" {
+        inline = ["<command1>", "<command2>"]
+        script = ["./script.sh"]
+    }
+}
+----------------------------------------------------------------------------------------------------------
+Null Resource
+
+syntax:
+
+resource "null_resource" "<resource_name>" {
+    <creation_details>
+    <connection_block>
+
+    Provisioner "remote-exec" {
+        inline = ["<command1>", "<command2>"]
+        script = ["./script.sh"]
+    }
+}
+----------------------------------------------------------------------------------------------------------
+27-09-2023 Class - 5
+----------------------------------------------------------------------------------------------------------
+Terraform State:
+
+Remote State [Backend]:
+
+State Lock:
+----------------------------------------------------------------------------------------------------------
+Terraform Settings:
+
+
+terraform {
+    required_version = "1.3.9"
+    required_providers {
+        aws = {
+            source = "hasicorp/aws"
+            version = "5.18.0"
+        }
+    }
+
+    backend "s3" {
+        bucket = <bucket_name>
+        key = "<path>"
+        region = "<region>"
+
+        dynamodb_table = "<dynamodb_table_name>"
+        encrypt = true
+    }
+}
+----------------------------------------------------------------------------------------------------------
+Terraform Taints:
+
+Commands:
+
+terraform taint <resource_type>.<resource_name> --> To taint a resource 
+terraform untaint <resource_type>.<resource_name> --> To untaint a resource 
+
+terraform state list --> To show the list of resources created by terraform 
+terraform state show <resource_type>.<resource_name> --> To get the details of a terraform managed resource
+
+----------------------------------------------------------------------------------------------------------
+Alias: 
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+provider "aws" {
+    region = "ap-southeast-1"
+    alias = "singapore"
+}
+
+resource "aws_instance" "terrrafom-instance-2" {
+    provider = aws.singapore
+    #singapore region
+}
+
+resource "aws_instance" "terrrafom-instance-2" {
+    #mumbai region
+}
+----------------------------------------------------------------------------------------------------------
