@@ -1,0 +1,715 @@
+26-April-2023
+------------------------
+1. We have creted the instance in AWS
+2. Logged into putty using keypair.
+--------------
+commands
+
+windows--- folder
+linux -- directory
+
+case sensitive-- small case/small letters
+
+mkdir --- > to create directory in linux
+cd .. --> To go back to prevoius directory
+cd ../.. --to come out of 2 or more directories
+cd dir1/dir2
+
+
+ls -----> list the files and directory in linux
+ls -l -- to list the files in long format
+ls -l o* --- to list all files starting with o
+
+
+cd --- to change directory
+pwd -- present working directory
+
+touch -- to create a file
+
+To edit file in linux we have default editor
+
+Vi --> editor
+
+esc + i --> to insert mode
+esc + :wq! -- to save the file(forcefully save your file)
+esc + :wq --- to save and quit
+esc + q! -- to quit without saving
+
+w--write
+q--quit
+!-- forcefully
+
+cat <file name> --> to view/check the contents in file
+cat -n <file name>  To view /check the contents of the file with line number
+
+----------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------
+27-April-2023
+----------------------------------------------------------------------------------------------
+
+Esc + dd -- to delete single line in vi editor or in file
+
+copy commands
+----------
+cp <filename> dir/ -- to copy file from one dir to other dir
+cp <filename1> <filename2> to copy file 
+cp -R <filename> <filename> - force fully copy
+cp -R <dir1> <dir2> --for fully copy -- assignment
+
+move commands
+-----------------
+mv <filename> <destination dir name> to move file from one dir to another dir
+mv <file_name> <file name> --- to rename the file
+
+echo
+-------
+echo "your message" --to print message on termainal
+example
+echo "hello world"
+
+echo -e "hello \nworld" -- to print message in new line
+
+word count
+----------
+wc <filename> to check munber of lines,word and charaters
+wc -l <filename> to check only line number
+wc -c <filename> to check only character
+wc -w <filename> to check only word
+
+file size and disk space
+------------------------
+du -sh <filename> --check the file size
+du -sb <filename> -- check the file size in bytes
+du -sh * -------> to check size of all files in directory
+
+df -h -- to check the disk size
+free -h --to check system memory(RAM)
+free -g -- to check system memory in GB
+
+Append (>>)
+------------
+copy the data to file from termainal
+example:
+echo "hello its thursday" >>friday(file name)
+
+Remove file and directories
+---------------
+rm <filename> -- to delete file
+rm -rf <directory name> -- to delete dir
+rm -rf * -- to all files and directories present in you current working directory
+---------------------------------------------------------------------------------------------
+28-April2023
+-----------------
+
+sudo --> super user(super user does)
+
+command to login as root user
+sudo su - 
+
+sudo is a command which gives permssion to user to execute as  root user.
+
+To give an user sudo permssion we have to add them into /etc/sudoers file
+
+syntax:
+
+<username>     ALL=(ALL:ALL)  NOPASSWSD: ALL
+
+To create a new user 
+
+adduser <username>
+ex:
+adduser bootcamp
+
+add groups
+------------
+sudo groupadd <group_name>  --> to create new group_name
+
+chgrp <group_name> directory name
+
+example:
+sudo chgrp devops opq
+usermod -aG <group_name> <username> --- to user to group
+
+example:
+ubuntu@ip-172-31-13-142:~$ sudo su - bootcamp
+bootcamp@ip-172-31-13-142:~$ id
+uid=1001(bootcamp) gid=1001(bootcamp) groups=1001(bootcamp),1003(devops)
+
+---------------------------------------
+changing ownership for a file and directory
+
+chown --to change owner of the directory
+
+sudo chown ubuntu:devops opq
+
+-----------------------
+
+Head --> To print only required lines
+
+head - 2 <filename> -- to display only first 2 lines
+head <file_name> -- to display starting 10 lines
+
+
+Tail --> to print last lines of the file
+
+tail -n <filename> -- to display last lines
+
+example: 
+
+tail -3 opqbootcamp
+
+-----------------------------------
+
+who -- to check all the users that have logged into this system
+
+whoami -- to check current user
+
+hostname -- to check ip address/private IP address
+
+pipe (|) to pass the output from one command to other command 
+
+bootcamp@ip-172-31-13-142:~$ ps -ef| head -2 opqbootcamp
+Welcome
+to
+bootcamp@ip-172-31-13-142:~$ ps -ef| tail -2 opqbootcamp |
+Welcome@2023
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+29-April-2023
+---------------
+
++ --> Adding the permission
+- --> removing the permission
+= --> we can change the complete permission of the file or directory
+
+u----> owner
+g---->group
+o---->others/public
+
+by deafult linux assigned 775 permission for dir
+ by default linux is assigned 664 for file
+ 
++ adding
+- delete
+= replacing
+a(all)=rwx
+
+examples:
+-----------------------------
+to add excute permission to owner -->chmod u+x document
+output --
+-rwxrw-r-- 1 ubuntu ubuntu 0 Apr 28 09:54 document
+
+To  add write permssion to group
+--->chmod g+w document
+
+to add wirte permission for others/public 
+--> chmod o+w document
+
+to assign permission to both owner and group
+---->chmod u-w,g-r document
+
+simultanesouly remove both permission.
+-----------------
+chmod o-rw document
+
+= operator
+---------------------
+chmod u=wrx,g=rx,o=r document
+
+suppose we want to owner,group and permission as permission
+
+chmod a=rwx filename
+
+0 = ---
+1 = --x
+2 = -w-
+3 =(combination of 1 and 2)= -wx
+4 =(read persmission) r--
+5 = read+1 r-x
+6 = 4+2 rw
+7 =all permission 4+2+1 rwx
+
+Examples:
+chmod 654 <directory name>
+
+drw-r-xr-- 2 ubuntu ubuntu 4096 Apr 28 12:19 doc1
+
+chmod 752 <directory name>
+
+drwxr-x-w- 2 ubuntu ubuntu 4096 Apr 28 12:19 doc1
+ 
+ ---------------------------------
+ 
+ umask is command that determines and control how permission are set for newly created files and directory
+ 
+ default value for umask - 0002
+ 
+ 777 - 022
+ 
+ 777 - 113
+ *******************************************************************
+
+	 --------------------------------------------
+	30-april-2023
+	----------------------------------
+
+
+	ramesh manager account 28000
+	suresh sales  marketing 8000
+	sunil associate nonit 9000
+	vinay director sales 50000
+	 
+    Grep -- used to search for a string inside the file
+	
+	grep "pattern" <file_name> -- display all the line with the pattern
+	
+	-------------------
+	
+	grep -i "<pattern> <filename> --> case insensitive
+	
+	grep -e "pattern" <filename1> -e "<pattern> <filename2>
+	
+	grep -w <pattern> <filename> -- to check whole word
+	
+	grep -l <pattern> * to check for the pattern in all files and print the filename
+	
+	grep -lR <pattern> * to check for the pattern in all the files recursivly and give the file name
+	
+	grep -v <pattern> <filename> --- tp print all the lines without pattern
+	
+	------------------------------------------------------------------
+	
+	sed -->stream editor and it can perform lof of functions like searching,find and replace,insersation or deletion
+	
+	sed 's/<hello>/devops/g' <filename> --- to replace old_word with new word and displays output in the termainal only
+	
+	sed -i 's/<hello>/devops/g' <filename> --  to replace old_word with new word and it in file directly
+	
+	sed -i '1s/<oldword>/<new_word>/g' <filename> -- to make changes only to first line
+	
+	sed -i '2,5s/<oldword>/<new_word>/g' <filename> -- to make changes from 2nd line to 5th line only
+	
+	---------------------------
+	
+	Assigment --
+	
+	how to replace in two files simultanesouly.
+	
+	------------------
+	
+	sed '2,5d" <filename> -- to delete from 2nd line to 5th line
+	
+	sed '2,$d' <filename> -- to delete from 2nd line to end 
+	
+	sed -n '2p' <filename> -- to print 2nd line only
+	
+	
+	----------------------------------------------
+	
+	tee
+	
+	echo "Welcome to opq" | tee <file_name>
+	
+	echo "Welcome to opq" | tee -a <file_name> -- to append 
+	
+	----------------------------------------------
+	
+	cut - used is to cut a file in column wise
+	
+	cut -d " " -f1 <file_name> -- to display only 1st column with single space as delimiter 
+	
+	cut -d " " -f1,2 <file_name> -- to display first and 2nd column
+	
+	cut -d " " -f1-4 details -- 
+	
+	-----------------------------------
+
+1-May2023
+---------------------
+.bashrc and bashprofile/profile
+
+bashrc - > the bash is a config file for the bash shell. The file consist of commands,functions and scripts that execute every time when session starts.
+
+bashprofile -> the .bash_profile is having custom config for specific user for terminal session. 
+
+---------------------------
+
+This both file automatically when system starts 
+
+example:
+export ps_cfg_home=/home/ubuntu/devops/mayday
+vi .bashrc
+
+bash_history --> stores all the commands that given to the server
+
+history -> to check all the commands given to server
+
+----------------------------------------
+awk --is mostly used for pattern scanning and processing 
+
+awk - scripting langauage used for manipulating data
+
+operation
+-----------
+1.scans file line-line
+2.spilit each line into filed
+--------------------------------------
+commands
+
+examples:
+
+1.awk '{print}' <filename> --> to display the contents of the file
+
+awk '{print}' details
+
+2. awk '/string/ {print}' <filename> --partcular string
+
+ex: awk '/vinay/ {print}' details
+
+3. awk -F " " '{print$3}' <filename>-- to display only 3 coulmn
+
+awk -F " " '{print$3}' details
+
+4. awk -F " " '{print$NF}' <filename>-- to display last column
+
+ex: awk -F " " '{print$NF}' details
+
+5. awk -F " " '{print$2,$3}' details-- to display 2nd and 3rd column
+
+6 awk 'NR==1 , NR==3 {print NR,$0} <filename> --- first 3 lines
+
+ex- awk 'NR==1 , NR==3 {print NR,$0}' details
+
+7 awk 'NR==6 {print}' <filename> --> to display 6th line
+
+-----------------------------------------------------------------------
+find command --> it supports searching a file,directories,creation and owner and permission
+
+find -name <filename> -- to search and display all files with the name
+
+find -iname <filename> --case sensitive search
+
+find -mtime -3 --> to find all the files and directories that were created last 3 days
+
+find -mtime +30 -->  to find all the files and directories that were created more 30 days
+
+find . -name tues(filename)  to search in the current and subdirectories as well
+
+find -name DEVOPS -type f --to find only files 
+
+find -name DEVOPS -type d -- to find only directories
+
+find -type f -name "opq*" -- to display starting with opq(only files)
+
+find -type d -name "d*" -- to display starting with opq(only directories)
+
+----------------------------------------------------------------------
+uniq and sort
+
+uniq <filename> -- to display only the unique values in the file
+
+Draw back - It eliminates duplicate values only if theay are adjacent to each other
+
+sort 
+
+sort <filename> to sort the values in a file (alphabetical order)
+sort -r <filename> to view it revers order
+
+sort <filename> | uniq ---> to sort and eliminate the duplicate values
+
+---------------------------------------------------------------------
+port -- A port is virtual point where network connections start and end . Each port is assocaited with specific process or services
+
+netstat
+
+command  to install netstat
+root user 
+sudo apt install net-tools
+netstat - a ---> to check all the ports 
+netstat -l --> to check the running ports
+
+yum <command>-- for redhat machines
+
+------------------------------------------
+
+telnet -- telnet is command utilizes the telnet network protcol to connect remote machines
+
+
+ubuntu@ip-172-31-13-142:~$ telnet 172.31.13.142 22
+Trying 172.31.13.142...
+Connected to 172.31.13.142.
+Escape character is '^]'.
+SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5
+
+default port - 23
+
+--------------------------------------
+port -- A port is virtual point where network connections start and end . Each port is assocaited with specific process or services
+
+netstat
+
+command  to install netstat
+root user 
+sudo apt install net-tools
+netstat - a ---> to check all the ports 
+netstat -l --> to check the running ports
+
+yum <command>-- for redhat machines
+
+------------------------------------------
+
+telnet -- telnet is command utilizes the telnet network protcol to connect remote machines
+
+
+ubuntu@ip-172-31-13-142:~$ telnet 172.31.13.142 22
+Trying 172.31.13.142...
+Connected to 172.31.13.142.
+Escape character is '^]'.
+SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5
+
+default port - 23
+
+--------------------------------------
+kill 
+-----
+kill -9 <pid> -- to kill a process by PID
+
+assigment:
+killall -9 <process name> -- to kill process by its name
+
+killall -u <username> -- to a kill process start by the user
+--------------------------------------------------
+top -- to check the running process,memory usage,cpu usage etc.
+
+---------------------------
+
+ping - Mainly used for checking the network connectivity from one server to another server.
+
+ping <hostname>
+ping 0 -- to ping current server
+example: ping google.com
+
+-----------------------------------
+
+ifconfig --> it will display your private ip
+
+curl ifconfig.me -- to display public IP
+
+---------------------------------------
+
+soft link and hard link
+
+link --> to create a shotcut of a file
+
+ln -s <orginal_filename> <softlink_filename> -- to create a soft link
+
+disadvntage --> if original file get deleated your softlink file will also be get deleted/it will not work.
+
+--------------------------------
+
+hard link - hardlink will point to inode of a file, so even if the original file get deleted the hard linl file will stiil work.
+
+ln <original file> <hardlink file name> -- to create hard link
+
+advantage: even your original file deleted hardlink file will still work.
+
+i - index
+
+ls -li --- check the inode of the file
+
+inode --> unique identification number of a file which points to the file memory block
+
+---------------------------------------
+
+SSH - Secure shell or secure socket shell
+
+Default port - 22
+HTTP -80
+HTTPS - 443
+jenkins - 8080
+------------------
+
+ssh -i <aws_pemkey> <username>@<public_ipaddress> -- to ssh into a server using pem keypair
+
+steps
+1.created server with .pem keypair
+2.open cmd(command prompt)
+3.syntax ->ssh -i <aws_pemkey> <username>@<public_ipaddress>
+example --> ssh -i C:\Users\106502\Downloads\may2nd.pem ubuntu@54.206.36.147
+4.To login to putty we have generate .ppk file using pem format with help of putty key generator
+5. Login to putty and verify your private IP
+
+----------------------------
+
+uname - to check os name
+
+uname -a --> To check all the details of the system/OS
+
+------------------------
+& -- to run a command/script in background
+
+syntax - ./scriptname &
+
+./ -- to excute a shell script
+
+----------------------------
+
+tar commands
+
+tar -cvzf <file_name.tar.gz> target directory -- to compress and zip the files
+
+tar -xvzf <zipped file_name.tar.gz> -- to untar the zipped files
+
+---------------------------------
+
+Assigment-
+
+scp - secure copy
+
+scp <file_name> <username>@<ipaddress>:directory_path
+
+--------------------------------------
+
+syntax:
+
+wget [option] [URL]
+
+wget -b -- download files in the background.
+
+wget -c to resume partially downloaded files
+
+$wget -v is used to dispaly the version for wget available in our system.
+
+------------------------------------------------------------------------------
+
+To install tomcat in linux
+
+1. sudo apt update -- > update your default repository.
+
+2.sudo apt-get install tomcat9 tomcat9-docs tomcat9-admin -y
+
+3. sudo vi /var/lib/tomcat9/conf/tomcat-users.xml
+
+addd below line last line
+<username="tomcat" password="password" roles="manager-script"/>
+
+4.Restart tomcat to reflect the changes made to the xml file.
+
+sudo systemctl restart tomcat9
+
+5. verify by status command
+
+sudo systemctl status tomcat9
+
+6. Login to your AWS console and inbound rule for 8080 port
+
+A. Go to your instance 
+B. Security--> incound rules --> edit your inbound rules
+c. type - custom TCP--port(8080) --source(custom)0.0.0.0/0
+D. Save it 
+
+7. Now access the using public ip and post
+
+http://publicIp:8080
+
+-------------------------------------------------------------------
+
+find  -type f -empty -- to display empty files
+
+find  -type f -empty -delete
+
+-------------------------------------------------
+
+Winscp -- to transfer files from windows to linux.
+
+download link-https://winscp.net/eng/download.php
+
+--------------------------------------------------------------------
+
+rsync - we can also use this command to copy files but major differnce is if there is any failure
+rsync will resume where copy failed
+
+rsync -avzf <filename> <user@ipaddress>:destination directory path.
+rsync -avzf <Directory> <user@ipaddress>:destination directory path.
+
+------------------------------------------------------------
+
+1.netsat
+2.telnet
+3.ping
+4.weget
+5.ssh
+6.scp
+7.rsync
+---------------------------
+
+1.find all files with size more than 10mb/1mb 
+2.find all files with size less than 10mb/1mb 
+3.find all files with size less than 10mb/1mb and delete it
+
+---------------------------------------
+
+
+----------------------------------------------
+16-May-2023
+----------------------
+Passwordless connection:
+
+1.We created 2 new servers server1 and server2
+
+2. create new user
+	sudo adduser <username>
+	sudo passwd <password>
+3. go to sudoers files
+
+add this line in suoders file
+docker ALL=(ALL) NOPASSWSD:ALL
+
+4.Now we need to make somechnages in ssh_config file in all server
+
+PasswordAuthentication yes
+PubkeyAuthentication yes
+
+5. restart the ssh service.
+
+vi /etc/ssh/sshd_config
+
+sudo systemctl restart sshd
+sudo systemctl status sshd
+
+6 scp command
+scp <file_name> <username>@<ipaddress>:directory_path
+
+example:
+
+scp filename docker@52.62.95.39:/home/docker
+
+step 7: To remove password 
+
+A) ssh-keygen
+
+B) cd .ssh
+
+c) ssh-copy-id <user_name>@IP_address
+
+example: ssh-copy-id docker@52.62.95.39
+
+-----------------------------------------------------
+sticky bit:
+A sticky bit is a permission bit that is set on file or a directory that lets only owner of the file or root user to 
+delete or rename the file. No other user is given permission to delete file.
+
+chmod +t <filename> - to turn on stickybit
+chmod -t <file/dir> - to turn off stickybit
+
+-----------------------------------------------------
+
+ubuntu : apt-get/apt
+redhat : yum
+fedra:yum
+cent os : yum
+-------------------------------------------------------
