@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbusername
+  namespace: default
+data:
+  user: dbuser
+
+---
+# kubectl create configmap <configmao-name> --from-literal <key>=<value>
+# kubectl create configmap dbusername --from-lieral user=dbuser

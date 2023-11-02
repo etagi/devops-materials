@@ -1,0 +1,1101 @@
+Kubernetes:
+----------------------------------------------------------------------------------------------------------
+16-08-2023 Class - 1
+----------------------------------------------------------------------------------------------------------
+Installation:
+
+Link --> https://github.com/OpqTech/kubernetes-installation [ follow Readme.md ]
+	 
+To create kubeadm join command --> kubeadm token create --print-join-command 
+ 
+To label a node --> kubectl label node <ip> node-role.kubernetes.io/<custom_name>= 
+----------------------------------------------------------------------------------------------------------
+17-08-2023 Class - 2
+----------------------------------------------------------------------------------------------------------
+Kubernetes Architecture: 
+
+* Master (Control Plane):-
+Kubernetes master majorly runs with four components
+	a) API-server - 
+		It is the main management point of the entire cluster. When we interact with the kubernetes 
+	cluster using kubectl commands we are actually communicating with the API-server.
+	API-server is the only Kubernetes component that connects to all other components. API-server is also 
+	responsible for authentication and authorization.
+	The API-sserver also implements a watch mechanism to watch for any required changes this allows components 
+	such as the scheduler and the controller-manager to interact with the API-server and try to match the desired
+	state with the actual state.
+
+	b) etcd-
+		etcd is a distributed consistent key value store used to store the configuration data of the complete
+	kubernetes cluster. etcd reliably stores the configuration data of the kubernetes cluster representing the state
+	of the cluster at any given point of time.(what nodes exist in the cluster, what pod should be running, which nodes
+	they are running on)
+	command: etcdctl snapshot save - take the backup of etcd 
+			{for more - etcd.io}
+	
+	c) Scheduler-
+		The scheduler watches for any unscheduled pods and binds them to the node.
+	Scheduler decides which node the pod has to be created according to the availability of the requested resources, 
+	affinity and anti-affinity specifications and other constraints.
+
+	d) Control-manager-
+		It's a daemon which runs a never ending core control loop(also known as contollers). Basically a controller
+	watches the state of the cluster to the API-server watch mechanism and when it gets notified it makes the necessary 
+	changes attempting to move the current state towards the desired state.
+	examples:
+		Deployment
+		Replication / Replica-set
+		stateful set
+		Daemon set
+
+* Major componets of Worker Nodes:
+
+Node(Worker)-
+A node is a worker machine where containers inside the pods will be launched by the kubernetes.
+	1) Container Runtime-
+		The Container Runtime is the undelying software that is used to run conatainers. Generally Docker is used
+	as the Container Runtime.
+	Other supported k8s container runtime= Docker, Cri-o, rktlet, etc.
+
+	2) Kubelet-
+		Kubelet is the agent that runs on each node in the cluster. Kubelet is responsible for making sure the 
+	conatainers are running on the nodes as expected.
+
+	3) Kube-proxy-
+		It is a proxy service which runs on each node and helps in making services available to theexternal hosts.
+	It helps in forwarding the requests to the correct conatainers and is capable of performing basic load balancing.
+
+	4) Pod-
+		A pod is the smallest deployable unit that can be managed by kubernetes. A pod can have one or more 
+	containers inside it.
+
+----------------------------------------------------------------------------------------------------------
+Pod Definition file:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: Nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80 
+----------------------------------------------------------------------------------------------------------
+Commands:
+
+kubectl get nodes --> To check all the nodes on the cluster
+
+kubectl apply -f <filename> --> To apply configuration in k8s 
+
+kubectl get pods --> To check all the pods running in the cluster
+
+kubectl get pods -o wide --> To check all the pods and more details of it 
+
+kubectl describe <object_type> name --> To gather info about the kubernetes object 
+
+kubectl delete <object_type> name --> To delete a kubernetes object
+----------------------------------------------------------------------------------------------------------
+19-08-2023 Class - 3
+----------------------------------------------------------------------------------------------------------
+Manifest file fields:
+
+1. apiVersion: 
+
+ex: v1, apps/v1, etc
+
+kubectl api-versions --> To list the api version in k8s
+kubectl api-resources --api-group <api-version-name> --> To check the objects that can be created by a particular api version
+kubectl api-resources -o wide --> To get the detailed list of api-verions 
+
+
+2. kind: 
+
+ex: pod, service, Deployment, etc 
+
+3. metadata: 
+
+4. spec: 
+
+5. labels:
+ex:
+    labels:
+      app: frontend
+      os: linux 
+
+6. selectors: 
+
+a. Equity-based selectors
+
+operators allowed are: =, ==, != 
+ex:
+app=nginx
+os=linux
+
+b. Set-based selectors 
+
+operators allowed are: in and notin
+ex: 
+    env in (prod,qa)
+    os notin (windows,linux)
+----------------------------------------------------------------------------------------------------------
+ReplicaSet/ReplicationController:
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: nginx
+  template:
+    metadata:   
+      name: nginx
+      labels:
+        app: nginx 
+    spec:     
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80 
+----------------------------------------------------------------------------------------------------------
+Deployment Controller: 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: nginx
+  template:
+    metadata:   
+      name: nginx
+      labels:
+        app: nginx 
+    spec:     
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80 
+
+commands: 
+
+kubectl set image deployment <deployment-name> <old-image>=<new-image> --record --> To update the image using Deployment Controller
+kubectl set image deployment nginx-deploy nginx=nginx:1.14 --record
+
+kubectl rollout history deploy nginx-deploy --> To check the total recorded history of the controller
+kubectl rollout undo deploy nginx-deploy --> To rollback to previous version of the application
+kubectl rollout undo  deploy nginx-deploy --to-revision --> To rollback to a paticular version/revision number 
+
+kubectl scale deploy nginx-deploy --replicas=6 --> To scale the pods
+----------------------------------------------------------------------------------------------------------
+22-08-2023 Class - 4
+----------------------------------------------------------------------------------------------------------
+DaemonSet:
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-daemon
+spec:
+  selector: 
+    matchLabels:
+      app: nginx
+  template:
+    metadata:   
+      name: nginx
+      labels:
+        app: nginx 
+    spec:     
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80 
+
+Typical use cases for DaemonSet are:
+a. Monitoring Exporters: NodeExporter, oneagent, ElasticsearchExporter, etc 
+b. Logs collection: Fluentd, logstash, etc. 
+
+----------------------------------------------------------------------------------------------------------
+StatefulSet:
+----------------------------------------------------------------------------------------------------------
+Pod Phases / Pod Lifecycle: 
+
+1. Pending: 
+2. Running: 
+3. Succeeded: 
+4. Failed: 
+5. Unknown: 
+----------------------------------------------------------------------------------------------------------
+Assignemnt:
+1.ImagePullErr
+2.CrashLoopBackOff 
+----------------------------------------------------------------------------------------------------------
+02-09-2023 Class - 5
+----------------------------------------------------------------------------------------------------------
+Probes: 
+
+also called as "Actuators" 
+
+configuring Probes:
+
+1. initalDelaySeconds [Default-0, Min-0]
+2. periodSeconds [Default-10, Min-0]
+3. timeoutSeconds [Default-1, Min-1]
+4. successThreshold [Defualt-1, Min-1]
+5. failureThreshold [Defualt-1, Min-1]
+
+Types of Probes:
+
+1. Readiness Probe: 
+2. Liveness Probe: 
+
+----------------------------------------------------------------------------------------------------------
+Probe Actions:
+
+ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+
+1. Shell [exec]:
+
+<probe_type>
+  exec:
+    command:
+    - command1
+    - command2
+    - command3
+
+example:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-exec
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 15; rm -f /tmp/healthy; sleep 600
+    livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+----------------------------------------------------------------------------------------------------------
+2. HTTP Request [httpget] : 
+
+syntax:
+
+<probe_type>
+  httpget:
+    path:
+      <path_inside_container>
+    port: 
+
+exmaple: 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-http
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/liveness
+    args:
+    - /server
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 3
+      periodSeconds: 3
+
+----------------------------------------------------------------------------------------------------------
+3. TCP port check [tcpSoccket]:
+
+synatx:
+<probe_type>:
+  tcpSocket:
+    port: <port>
+
+example:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: Nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80 
+    redinessProbe:
+      tcpSocket:
+        port: 80 
+----------------------------------------------------------------------------------------------------------
+Startup Probe [k8s - 1.16]:
+
+Both Startup and liveness have same properties that is in case of failure they restart the container.
+If both startup and liveness probes are set after container creation kubelet will execute startup probe 
+first if start up probe succeeds then liveness probe takes over further actions. If startup probe failes 
+the pod is restarted and the cycle is repeated. It is and extra layer of check for the pods.
+----------------------------------------------------------------------------------------------------------
+03-09-2023 Class - 6
+----------------------------------------------------------------------------------------------------------
+Kubernetes Services: 
+
+Need for kubernetes services: 
+
+Types of services in Kubernetes:
+
+1.ClusterIP:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      name: hello-world
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - name: hello-world
+        image: opqtech/k8s-helloworld
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: service
+metadata:
+  name: cip
+spec:
+  type: clusterIP
+  ports:
+  - targetPort: 8080
+    port: 8080
+  selector: 
+    app: hello-world
+
+----------------------------------------------------------------------------------------------------------
+2. NodePort:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      name: hello-world
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - name: hello-world
+        image: opqtech/k8s-helloworld
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: np
+spec:
+  type: NodePort
+  ports:
+  - targetPort: 8080
+    port: 8080
+    nodePort: 31234
+  selector: 
+    app: hello-world
+
+----------------------------------------------------------------------------------------------------------
+3. Loadbalancer:
+----------------------------------------------------------------------------------------------------------
+4. Headless: 
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-daemon
+spec:
+  replicas: 3
+  serviceName: "nginx"
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: frontend
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+
+----------------------------------------------------------------------------------------------------------
+06-09-2023 Class - 7
+----------------------------------------------------------------------------------------------------------
+Manually Scheduling pods:
+
+1. nodeSelector: 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: Nginx
+  labels: 
+    app: frontend
+spec:
+  nodeSelector:
+    spec: high
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+
+Commands:
+
+kubectl get nodes --show-labels --> To display all the labels associated with the nodes
+kubetl label node <node_name> <key>=<value> --> To add a label to a node 
+kubectl label node <node_name> <key>- --> To remove a label
+----------------------------------------------------------------------------------------------------------
+2. affinity:
+
+Hard Rule [ requiredDuringScheduling ]
+Soft Rule [ preferredDuringScheduling ]
+
+a. nodeAffinity:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    - containerPort: 80 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: spec
+            operator: In
+            values:
+            - high
+
+----------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    - containerPort: 80 
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference: 
+            matchExpressions:
+            - key: spec
+              operator: In
+              values:
+              - low
+        - weight: 2
+          preference: 
+            matchExpressions:
+            - key: spec
+              operator: In
+              values:
+              - medium
+        - weight: 3
+          preference: 
+            matchExpressions:
+            - key: spec
+              operator: In
+              values:
+              - high
+        - weight: 4
+          preference: 
+            matchExpressions:
+            - key: type
+              operator: In
+              values:
+              - hdd 
+        - weight: 5
+          preference: 
+            matchExpressions:
+            - key: type
+              operator: In
+              values:
+              - ssd
+----------------------------------------------------------------------------------------------------------
+07-09-2023 Class - 8
+----------------------------------------------------------------------------------------------------------
+PodAffinity and podAntiAffinity:
+
+1. Deploy DB with nodeSelector:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      name: db
+      labels:
+        app: db
+    spec:
+      nodeSelector:
+        spec: high
+      containers:
+      - name: nginx-db
+        image: nginx
+        ports:
+        - containerPort: 80
+
+2. Deploy web app with anti-affinity
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+      app: web
+  template:
+    metadata:   
+      name: web
+      labels:
+        app: web 
+    spec:
+      containers:
+      - name: nginx-web
+        image: nginx
+        ports:
+        - containerPort: 80     
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - web
+                  - db
+              topologyKey: kubernetes.io/hostname
+
+3. Deploy redis with affinity and anti-affinity
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+      app: redis
+  template:
+    metadata:   
+      name: redis
+      labels:
+        app: redis 
+    spec:
+      containers:
+      - name: nginx-redis
+        image: nginx
+        ports:
+        - containerPort: 80     
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - web
+              topologyKey: kubernetes.io/hostname
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+                  - db 
+              topologyKey: kubernetes.io/hostname
+
+----------------------------------------------------------------------------------------------------------
+Taints and Tolerations: 
+
+Taint Effects:
+1. NoSchedule 
+2. perferNoSchedule 
+3. NoExecute 
+
+commands: 
+
+kubectl taint node <node_name> <key>=<value>:<Taint_Effect>   --> To taint a node
+kubectl taint node <node_name> <key>=<value>:<Taint_Effect>-  --> To untaint a node
+
+Example:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80 
+  tolerations:
+  - key: taint
+    operator: Equal
+    value: w1 
+    effect: NoSchedule 
+----------------------------------------------------------------------------------------------------------
+10-09-2023 Class - 9
+----------------------------------------------------------------------------------------------------------
+Kubernetes Volumes:
+
+Simple mount:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - mountPath: /home
+      name: simple-mount
+  volumes:
+  - name: simple-mount
+    hostPath:
+      path: /tmp/simple-mount
+      type: DirectoryOrCreate
+
+----------------------------------------------------------------------------------------------------------
+1. Ephemeral Volumes:
+
+2. Persistent Volumes (PV):
+    a. Static 
+        PV --> PVC --> pod
+    b. Dynamic 
+        storageclass --> PVC --> Pod 
+
+persistentVolumeClaim (PVC):
+----------------------------------------------------------------------------------------------------------
+PersistentVolume:
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv 
+spec:
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/pv
+  storageClassName: static
+  accessModes:
+  - ReadWriteOnce 
+----------------------------------------------------------------------------------------------------------
+PersistentVolumeClaim:
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc
+spec:
+  storageClassName: static
+  accessModes:
+  - ReadWriteOnce
+  resources:
+   requests:
+    storage: 1Gi 
+----------------------------------------------------------------------------------------------------------
+mounting PVC to pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  volumes:
+  - name: persistent-volumes
+    persistentVolumeClaim:
+      claimName: pvc
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - mountPath: /home
+      name: persistent-volumes
+----------------------------------------------------------------------------------------------------------
+access modes:
+
+1. ReadWriteOnce: 
+2. ReadOnlyMany:
+3. ReadWriteMany: 
+4. ReadWriteOncePod: 
+----------------------------------------------------------------------------------------------------------
+Reclaim Policies: 
+1. Retain: 
+2. Delete: 
+3. Recycle [Deprecated]:
+----------------------------------------------------------------------------------------------------------
+Assignment:
+1. emptyDir volume mount
+----------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
+11-09-2023 Class - 10
+----------------------------------------------------------------------------------------------------------
+Environment Variables:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    env:
+    - name: ENV
+     value: dev
+    - name: URL
+      value: ip-172-31-34-63.ap-south-1.compute.internal
+    - name: USER
+      value: devops
+----------------------------------------------------------------------------------------------------------
+ConfigMaps and secrets:
+
+configMaps: 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbusername
+data:
+  user: dbuser
+
+kubectl create configmap <configmao-name> --from-literal <key>=<value>
+kubectl create configmap dbusername --from-lieral user=dbuser
+----------------------------------------------------------------------------------------------------------
+secret:
+
+ResourceQuota:
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: rq 
+  namespace: dev 
+spec:
+  hard:
+    pods: 1
+    configmaps: 2
+    secrets: 1
+    limits.cpu: 0.5
+    requests.cpu: 0.1
+    limits.memory: 500Mi
+    requests.memory: 200Mi
+
+pod with limits:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: dev 
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      requests: 
+        cpu: 0.1
+        memory: 126Mi
+      limits:
+        cpu: 0.25
+        memory: 256Mi 
+
+echo "string" | base64 --> to encrypt the value/string 
+echo <encryped-string> | base64 -d --> to decrypt the value 
+
+kubectl create secret generic <secret-name> --from-literal <key>=<value>
+kubectl create secret generic dbpassword --from-literal password=devops@123
+----------------------------------------------------------------------------------------------------------
+Namespace: 
+
+1. Default
+2. kube-system
+3. kube-public
+4. kube-node-lease
+
+Create a namespace using maifest file:
+
+apiVersion: v1
+kind: Namespace 
+metadata:
+  name: dev 
+
+kubectl create ns <namespace_name> --> To create a namespace using kubectl command
+----------------------------------------------------------------------------------------------------------
+Creating ojects in a namespace 
+
+1. using maifest file 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: dev 
+  labels: 
+    app: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+
+2. using kubectl command:
+
+kubectl apply -f <.yaml> -n <namespace_name>
+----------------------------------------------------------------------------------------------------------
+Assignment:
+Mount configMap and secret as volume
+----------------------------------------------------------------------------------------------------------
+16-09-2023 Class - 11
+----------------------------------------------------------------------------------------------------------
+ResourceQuota:
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: rq 
+  namespace: dev 
+spec:
+  hard:
+    pods: 1
+    configmaps: 2
+    secrets: 1
+    limits.cpu: 0.5
+    requests.cpu: 0.1
+    limits.memory: 500Mi
+    requests.memory: 200Mi
+
+pod with limits:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: dev 
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      requests: 
+        cpu: 0.1
+        memory: 126Mi
+      limits:
+        cpu: 0.25
+        memory: 256Mi 
+----------------------------------------------------------------------------------------------------------
+Securing Kubernetes:
+
+Context: 
+A context is a group of access parameters to enable secure connection to a specific cluster’s API server. 
+Each context contains a Kubernetes cluster, a user, and a namespace..
+
+----------------------------------------------------------------------------------------------------------
+Types of Users in Kubernetes: 
+User Account: We can create users and groups who can connect to the Kubernetes API server. 
+kubernetes- admin is the default user
+
+Service-Account:
+Service accounts are used to give access to processes inside pods to interact with the
+Kubernetes API. They can also be used by applications outside the cluster.
+
+For example, Prometheus monitoring tool which is used to monitor the cluster can be given the access using 
+Service-Account.
+
+----------------------------------------------------------------------------------------------------------
+Creating service account:
+
+step1: Create a service account
+kubectl create sa test-sa 
+
+step2: get the secret token name in the service account 
+kubectl describe sa test-sa
+
+step3: get the token value of the secret 
+kubectl describe secret <secret_name>
+
+step4: assign the token value to a variable
+TOKEN="<token-value-from-secret>"
+
+steap5: assign the credential to the sa 
+kubectl config set-credentials test-sa --token=$TOKEN
+
+step6: creating a context for the service account
+kubectl config set-context test-con --cluster=kubernetes --user=test-sa 
+----------------------------------------------------------------------------------------------------------
+Commands:
+
+kubectl config get-contexts --> To display available contexts in config
+kubectl config use-context con --> To switch to a context
+----------------------------------------------------------------------------------------------------------
+RBAC:
+
+RBAC or Role-Based Access Control is an approach in Kubernetes used to add constraints for users, groups, 
+and applications to access Kubernetes resources. RBAC basically adds security to the Kubernetes cluster, 
+and we can apply it for a specific namespace or to the total cluster.
+It was introduced in version 1.8 and uses rbac.authorization.k8s.io API group. 3 important concepts in RBAC.
+
+a. Subject: Subject is the entity that needs access. It could be user or group or a service account
+b. Resources: Resource is the K8s object that a subject wants to access. It could be pods, deployments, services etc
+c. Verbs: Verbs are the actions that a subject can do on resources. It could be the list, delete, create, watch etc
+----------------------------------------------------------------------------------------------------------
+Role & Cluster Role:
+Role and ClusterRole contains set of rules to access & modify Kubernetes resources. 
+Difference between them is Role works in a particular namespace while ClusterRole is cluster wide. 
+Basically, we use Role If we want to define permissions inside a namespace and use ClusterRole for cluster wide.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cr 
+rules:
+- apiGroups: ["*"] 
+  resources: ["pods", "secrets"]
+  verbs: ["get", "list", "create"]
+
+kubectl create clusterrole cr --resources=pods --resources=secrets --verb=get --verb=create 
+----------------------------------------------------------------------------------------------------------
+Cluster Role Binding and Role Bindings:
+
+Rolebinding binds the Role to a Subject to access the Resources within a namespace while 
+ClusterRoleBinding binds the ClusterRole to a Subject to access the resources cluster-wide.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: crb
+subjects:
+- kind: ServiceAccount
+  name: test
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cr
+  apiGroup: rbac.authorization.k8s.io
+
+kubectl create clusterrolebinding crb --serviceaccount=default:test --clusterrole=cr
+----------------------------------------------------------------------------------------------------------
+kubectl auth can-i get pods --> To check access
+----------------------------------------------------------------------------------------------------------

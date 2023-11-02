@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liveness-test
+  namespace: default
+  labels:
+    app: liveness-test
+spec:
+  selector:
+    matchLabels:
+      app: liveness-test
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: liveness-test
+    spec:
+      containers:
+        - name: liveness-test
+          image: nginx:latest
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          ports:
+            - containerPort: 80

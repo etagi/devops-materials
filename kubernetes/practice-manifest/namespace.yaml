@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+
+---
+# kubectl create ns <namespace_name>
+# kubectl create ns dev

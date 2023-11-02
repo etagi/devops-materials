@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: startup-test
+  namespace: default
+  labels:
+    app: startup-test
+spec:
+  selector:
+    matchLabels:
+      app: startup-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: startup-test
+    spec:
+      containers:
+        - name: startup-test
+          image: nginx:latest
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 3
+            failureThreshold: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          ports:
+            - containerPort: 80

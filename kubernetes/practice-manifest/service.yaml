@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cip-svc
+  namespace: default
+spec:
+  selector:
+    app: cip-svc
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-svc
+  namespace: default
+spec:
+  selector:
+    app: np-svc
+  type: NodePort
+  ports:
+    - port: 31200
+      targetPort: 80
+      nodePort: 31200
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-svc
+  namespace: default
+spec:
+  selector:
+    app: lb-svc
+  type: LoadBalancer
+  ports:
+    - port: 31200
+      targetPort: 80
+      nodePort: 31200
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hl-svc
+  namespace: default
+spec:
+  selector:
+    app: mysql
+  ClusterIP: None
+  ports:
+    - port: 3306
+      targetPort: 3306

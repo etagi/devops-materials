@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: frontend
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+
+---
+# kubectl taint node <node_name> <key>=<value>:<Taint_Effect>
+# kubectl taint node <node_name> example=w1:NoSchedule
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: frontend
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+  tolerations:
+    - key: example
+      operator: Equal
+      value: w1
+      effect: NoSchedule

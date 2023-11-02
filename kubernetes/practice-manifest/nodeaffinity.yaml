@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "my-pod"
+  namespace: default
+  labels:
+    app: "my-pod"
+spec:
+  containers:
+    - name: my-pod
+      image: "nginx:latest"
+      ports:
+        - containerPort: 80
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: instance
+                operator: In
+                values:
+                  - high
+                  - medium
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: webserver
+      image: nginx
+  ports:
+    - containerPort: 80
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1                  // if it is not there if they can't find label it will move to pending state
+          preference:
+            matchExpressions:
+              - key: spec
+                operator: In
+                values:
+                  - test                //if they find spec=test they have highest preferance
+        - weight: 5
+          preference:
+            matchExpressions:
+              - key: spec
+                operator: In
+                values:
+                  - high

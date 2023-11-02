@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: webserver
+      image: nginx
+  ports:
+    - containerPort: 80
+  nodeSelector:
+    instance: high
+
+---
+# kubectl label nodes <node_name> instance=high

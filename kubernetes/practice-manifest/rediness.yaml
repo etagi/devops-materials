@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rediness-test
+  namespace: default
+  labels:
+    app: rediness-test
+spec:
+  selector:
+    matchLabels:
+      app: rediness-test
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: rediness-test
+    spec:
+      containers:
+        - name: rediness-test
+          image: nginx
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 20
+            timeoutSeconds: 2
+            successThreshold: 3
+            failureThreshold: 3
+            periodSeconds: 10
+          ports:
+            - containerPort: 80

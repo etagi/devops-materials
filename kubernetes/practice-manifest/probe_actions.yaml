@@ -1,0 +1,29 @@
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 80
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+  periodSeconds: 10
+---
+livenessProbe:
+  exec:
+    command:
+      - cat
+      - /tmp/healthz
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+  periodSeconds: 10
+---
+livenessProbe:
+  tcpSocket:
+    port: 80
+  initialDelaySeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+  periodSeconds: 10

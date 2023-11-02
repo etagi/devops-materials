@@ -1,0 +1,106 @@
+EKS Cluster:
+
+Step1: Install AWS CLI
+https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html 
+
+Step2: Opend cmd.exe/windowspowershell as Administrator 
+
+Step3: Install Chocolatey 
+https://docs.chocolatey.org/en-us/choco/setup 
+
+Step4: Install eksctl
+choco install -y eksctl 
+
+Step5: Install kubectl
+choco install kubernetes-cli 
+
+Step6: Create Cluster
+
+eksctl create cluster \
+--name my-cluster \
+--version 1.26 \
+--with-oidc \
+--nodegroup-name worker \
+--region ap-south-1 \
+--managed \
+--ssh-access \
+--ssh-public-key devops
+
+Setting kube Config File:
+aws eks --region ap-south-1 update-kubeconfig --name my-cluster 
+
+cleanup: 
+eksctl delete cluster --name my-cluster --region ap-south-1 
+
+---------------------------------------------------------------------------------------------------------------
+Kubernetes Dashboard [UI]:
+
+Step1: Install Kubernetes Metric Server [eks]
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml 
+
+Step2: Install Kubernetes Dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+alternate URL: https://github.com/kubernetes/dashboard [dashboard]
+kubectl apply -f dashboard/charts/kubernetes-dashboard.yaml
+
+Step3: Run command line proxy
+kubectl proxy 
+
+Step4: Access the dashboard/v2
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+Step5: creating admin-user 
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+  
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/service-account.name: "admin-user"   
+type: kubernetes.io/service-account-token  
+
+Step6: get token 
+kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+
+To delete dashboard namespace
+kubectl delete ns kubernetes-dashboard
+
+---------------------------------------------------------------------------------------------------------------
+Deploy Ingress Controller -- https://kubernetes.github.io/ingress-nginx/deploy/ 
+
+Step1: Install Helm
+https://helm.sh/docs/intro/install/
+
+Step2: Deploy Ingress Controller
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-test --create-namespace
+  
+Delete:
+kubectl delete ns ingress 
+---------------------------------------------------------------------------------------------------------------

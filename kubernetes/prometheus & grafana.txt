@@ -1,0 +1,41 @@
+Install Helm:
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+
+
+Prometheus and Grafana:
+
+Setup Prometheus:
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/prometheus --set server.persistentVolume.enabled=false
+kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-node
+kubectl get svc
+And go to <ip-of-master>:<Node-port>
+
+Setup Grafana:
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm install grafana grafana/grafana --set persistence.enabled=false
+kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-node
+kubectl get svc
+And go to <ip-of-master>:<Node-port>
+
+Kubectl get secrets
+kubectl edit secret grafana
+
+admin-password: ekJlbmU0dTFueE1zeVZ6a1lJc29RWGloUm9QNUVEUldvWHlpejdXbw==
+admin-user: YWRtaW4=
+
+echo "ekJlbmU0dTFueE1zeVZ6a1lJc29RWGloUm9QNUVEUldvWHlpejdXbw==" | base64 -d ; echo
+echo "YWRtaW4=" | base64 -d ; echo
+
+admin-password: zBene4u1nxMsyVzkYIsoQXihRoP5EDRWoXyiz7Wo
+admin-user: admin
+
+
+Grafana Dashboard:
+https://grafana.com/grafana/dashboards/10856-k8-cluster/
+https://grafana.com/grafana/dashboards/3119-kubernetes-cluster-monitoring-via-prometheus/
