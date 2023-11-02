@@ -1,0 +1,492 @@
+Docker:
+----------------------------------------------------------------------------------------------------------------
+14-07-2023 Class - 1
+----------------------------------------------------------------------------------------------------------------
+Docker is a software platform for building applications based on containers 
+
+Containers & Virtual Machines:
+
+One of the goals of modern software development is to keep applications on the same host
+or cluster isolated from one another so they don't interfere with each other's operation or maintenance.
+
+Virtual Machines:
+One solution to this problem has been virtual machines, which keep applications on the same hardware 
+entirely separate, and reduce conflicts among software components and competition for hardware resources
+to a minimum. 
+
+But virtual machines are bulky—each requires its own OS, so is typically gigabytes in size—and 
+difficult to maintain and upgrade.
+
+Containers:
+Containers, by contrast, share the same underlying kernel and isolate applications'
+execution environments from one another. Due to this they are usually in megabytes and boot up instantly.
+
+A container is a standalone unit of software that packages together applications with all its 
+dependencies and configurations.
+----------------------------------------------------------------------------------------------------------------
+Installation:
+
+https://docs.docker.com/engine/install/ubuntu/
+
+Post Installation:
+
+https://docs.docker.com/engine/install/linux-postinstall/
+----------------------------------------------------------------------------------------------------------------
+Docker Image:
+Docker is used to create, run and deploy applications in containers. 
+A Docker image contains application code, libraries, tools, dependencies and other files 
+needed to make an application run.
+
+In simple words a Docker image is an executable file, that creates a Docker container. 
+A Docker image is comparable to an AMI in AWS.
+
+Docker images are a reusable and can be deployed on any host. Developers can take the Docker image 
+from one project and use them in another. This saves the user time, because they do not have to 
+recreate an image from scratch.
+----------------------------------------------------------------------------------------------------------------
+Docker Image Repository:
+
+Docker images can be stored in private or public repositories, 
+such as Docker Hub, Amazon Container Registry etc. 
+
+https://hub.docker.com/
+----------------------------------------------------------------------------------------------------------------
+Commands:
+
+docker search <image_name> --> To search for a docker image_name
+docker pull <image_name> --> To pull a docker image to local system from dockerhub
+docker image ls --> To list all the docker images on local system
+docker images --> To list all the docker images on local system
+docker rmi <image_name/image_id> --> To delete a docker image
+----------------------------------------------------------------------------------------------------------------
+Docker Containers:
+
+docker run -it <Image_name> --> To run/create a container
+docker ps --> TO list all running containers
+docker ps -a --> To list all the containers
+docker rm <conatiner_name/container_id> --> To remove a container
+docker rm <conatiner_name/container_id> --force --> To delete a container forecfully
+docker stop <conatiner_name/container_id> --> To stop a container
+docker stop --time=100 --> To stop a conatiner after particular time period 
+docker start <conatiner_name/container_id> --> to start a container 
+----------------------------------------------------------------------------------------------------------------
+16-07-2023 Class - 2
+----------------------------------------------------------------------------------------------------------------
+Docker Architecture:
+
+Docker daemon: It is also referred to as 'dockerd' and it accepts Docker API requests 
+and manages Docker objects such as images, containers, networks, and volumes. 
+It can also communicate with other daemons to manage Docker services.
+Note: A daemon is a service process that runs in the background and functionality to other processes.
+
+Docker Client: It is the way that enables users to interact with Docker. 
+It sends the docker commands to docker daemon. The Docker client can communicate 
+with more than one daemon.
+
+Docker Registry: It hosts the Docker images and is used to pull and push the docker images 
+from registry. Docker Hub is the public registry that anyone can use, 
+and Docker is configured to look for images on Docker Hub by default.
+
+Docker Host: It is the physical host on which Docker Daemon is running 
+and docker images and containers are created.
+----------------------------------------------------------------------------------------------------------------
+Commands:
+ctrl p+q --> Detach Keys [Escape Sequence] --> To exit from a container without stopping it 
+
+docker run -it --name <container_name> <image_name> --> To give a name to the container
+docker run -itd <image_name> --> To start a container in background
+docker run -itd -p <host-port>:<container-port> <image_name> --> To publish a container port 
+docker run -itd -p 8090:8080 jenkins/jenkins 
+
+ctrl p+q --> Detach Keys [Escape Sequence] --> To exit from a container without stopping it 
+
+docker attach <conatiner_name/container_id> --> To attach to a running container 
+docker exec -it <conatiner_name/container_id> sh --> To attach to a running container
+docker exec <conatiner_name/container_id> <command> --> To execute a command inside a running container 
+
+Assignment:
+Assign detach key/Escape sequence to a container 
+Difference between docker attach and exec 
+How to map multiple port numbers for a container 
+----------------------------------------------------------------------------------------------------------------
+17-07-2023 Class - 3
+----------------------------------------------------------------------------------------------------------------
+Dockerfile:
+
+Default Name: Dockerfile 
+
+docker build . --> Build's a docker image with Dockerfile present in current directory
+docker build -f <Dockerfile_name> <path> --> To create a Image with any other name for Docker file
+											or if the Dockerfile is present in some other path
+docker build --tag="<image_name>:<tag>" . --> To give a custom name for the image 			
+docker build -t <image_name> . -->  To give  a custom name for the image
+----------------------------------------------------------------------------------------------------------------
+Dockerfile Instructions:
+
+1. FROM 
+
+synatx: 
+
+FROM <image_name>:<tag>
+
+Example: 
+FROM ubuntu:latest
+----------------------------------------------------------------------------------------------------------------
+2. RUN
+
+synatax:
+
+RUN <command>
+
+Example:
+RUN apt update 
+RUN apt update && RUN apt insatll unzip && RUN apt install wget 
+----------------------------------------------------------------------------------------------------------------
+Assignment:
+Layer caching in Docker 
+Build Context 
+----------------------------------------------------------------------------------------------------------------
+3. CMD 
+
+syntax: 
+
+CMD <command>
+
+Example:
+
+CMD ["ls"]
+CMD ["echo", "hello"]
+CMD ["sh", "script.sh"]
+----------------------------------------------------------------------------------------------------------------
+4. ENTRYPOINT
+
+synatx:
+
+ENTRYPOINT <command>
+
+Example: 
+
+ENTRYPOINT ["ls"]
+ENTRYPOINT ["sh", "script.sh"]
+
+docker run --entrypoint <command> <image> --> To change the entrypoint during runtime
+----------------------------------------------------------------------------------------------------------------
+18-07-2023 Class - 4
+----------------------------------------------------------------------------------------------------------------
+5. COPY
+
+syntax: 
+
+COPY <source_path> <destination_path>
+
+Example:
+
+COPY script.sh scripts/
+----------------------------------------------------------------------------------------------------------------
+6 ADD
+
+syntax:
+
+ADD <source_path> <destination_path>
+ADD <URL> <destination_path>
+ADD <tar_file> <destination_path> 
+ADD --chown=<user>:<group> <source_path> <destination_path>
+
+Example: 
+
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.78/bin/apache-tomcat-9.0.78.tar.gz URL/
+ADD apache-tomcat-9.0.78.tar.gz unzip/
+----------------------------------------------------------------------------------------------------------------
+7. ENV 
+
+synatx:
+
+ENV <key>=<value>
+ENV <key>=<value> <key>=<value>
+
+Example: 
+
+ENV USER=devops
+
+docker run -it --env <key>=<value> <image_name>
+docker run -it --env-file <path-to-the-file> <image_name>
+----------------------------------------------------------------------------------------------------------------
+8. ARG
+
+sytax:
+
+ARG <key>
+
+Example:
+
+ARG user
+RUN useradd $user
+
+docker build --build-arg <arg>=<value> -t <image_name> . 
+docker build --build-arg user=devops -t ubuntu:arg . 
+----------------------------------------------------------------------------------------------------------------
+Assignment:
+
+Learn about USER, WORKDIR, EXPOSE, LABEL, SHELL 
+Docker command to copy files from host machine to a running container 
+----------------------------------------------------------------------------------------------------------------
+20-07-2023 Class - 5
+----------------------------------------------------------------------------------------------------------------
+Docker Push:
+----------------------------------------------------------------------------------------------------------------
+1. Docker Hub
+
+Prerequsites:
+	1. Dockerhub account
+	2. Setup credentials inside the host machine using docker login command 
+	
+commands:
+	docker login --> To login to Dockerhub
+	docker tag <old_image_name> <username>/<reponame>:tag --> To rename exsting image 
+	docker push <username>/<reponame>:tag --> To push image to a repository 
+----------------------------------------------------------------------------------------------------------------
+	
+2. Amazon Elastic Container Registry [ ECR ]:
+
+Prerequsites:
+	1. AWS CLI should be installed and configured with accesskey and secret key
+	2. Create a repo in ECR 
+	
+a. Using Session Tokens:
+
+aws ecr get-login-password --region <region> |\
+docker login \
+--username AWS \
+--password-stdin \
+<ecr_repo>
+
+Example 
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 252180052463.dkr.ecr.ap-south-1.amazonaws.com
+	
+b. Setting permanent connection using ecr-credential-helper:	
+
+sudo apt update 
+sudo apt install amazon-ecr-credentail-helper 
+
+config.json:
+
+{
+        "credsStore": "ecr-login"
+}
+----------------------------------------------------------------------------------------------------------------
+30-07-2023 Class - 6
+----------------------------------------------------------------------------------------------------------------
+1.Docker Volumes:
+
+/var/lib/docker/volumes/
+
+docker volume create <volume_name> --> To create a Docker Volumes
+example:
+	docker volume create feedback
+	
+docker volume ls --> To list the Docker volumes
+docker volume rm --> To delete/remove a Docker Volume
+
+synatx:
+docker run -itd -v <Volume_name>:<container_path> <image_name> -->To use Docker volume Mounts 
+example:
+docker run -itd -p 80:80 testvolume:/app/feedback/ node:1 
+
+https://github.com/OpqTech/nodejs-feedback.git
+
+2. Bind Mount:
+
+Commands:
+docker run -it -v <host_machine_path>:<container_path> <image_name>
+
+example:
+docker run -it -v /home/ubuntu/bind:/app/feedback/ node:1
+docker run -it -v /home/ubuntu/bind:/app/feedback/ testvolume:/app/home/:ro node:1 --> To mount multiple volumes
+ro --> readonly
+
+3. unnamed Volumes: These are created using "VOLUME" instruction in Dockerfile
+----------------------------------------------------------------------------------------------------------------
+01-08-2023 Class - 7
+----------------------------------------------------------------------------------------------------------------
+Resource Limits:
+
+1. Memory Limit:
+
+Commands:
+docker run -itd --memory <size> <image_name> 
+soft Limit
+docker run -itd --memory <size> --memory-reservation <size> <image_name> 
+
+example: 
+docker run -itd --memory 500m --memory-reservation 300m alpine
+
+2.CPU Limit:
+
+commmand:
+docker run -it --cpus <size> <image_name>
+example:
+docker run -itd --cpus 0.5 alpine 
+----------------------------------------------------------------------------------------------------------------
+docker stats --> To check the container resource usage
+docker system df --> To check the docker service memory usage 
+----------------------------------------------------------------------------------------------------------------
+Assignment: 
+docker update 
+----------------------------------------------------------------------------------------------------------------
+Docker Prune:
+
+Commands:
+docker system prune --> Removes all stopped containers, unused networks, dangling images/cache
+docker image prune --> To remove dangling images
+docker image prune -a --> To remove all unused images
+docker container prune --> To remove all unused conatiners
+docker network prune --> To remove  all  unused networks
+docker volume prune --> To remove all unused volumes 
+
+Dangling Images:
+
+docker images -f dangling=true --> To list the dangling images 
+----------------------------------------------------------------------------------------------------------------
+1. To display all stopped/exited containers:
+	docker ps -a -f status=exited 
+2. To delete all stopped/exited containers:
+	docker ps -a -f status=exited -q | xargs docker rm
+3. To delete all images 
+	docker images -q | xargs docker rmi 
+4. To display only container ID 
+	docker ps -aq (or) docker ps -a -q 
+5. To display only ImageID 
+	docker image ls -q (or) docker images -q 
+6. To remove all the containers 
+	docker ps -aq | xargs docker rm -f 
+7. To stop all running containers 
+	docker ps -q | xargs docker stop --time=0 
+----------------------------------------------------------------------------------------------------------------
+02-08-2023 Class - 8
+----------------------------------------------------------------------------------------------------------------
+Docker Networks:
+
+1. Bridge Network [ --driver bridge ]
+2. Host Network [ --driver host ] 
+3. Null Network [ --driver none ]
+
+Commands:
+
+docker network ls --> To list the networks 
+docker network create <network_name> --> To create a network
+docker network create <subnet/CIDR> <network_name> --> To create a network with custom subnet/CIDR
+docker network rm <network_name>/<network-ID> --> To remove a network
+
+docker run -itd --network <network_name> --> To create a container under a specific network
+
+docker network connect <network_name> <container_name> --> To connect a conatiner to another network 
+
+example:
+docker network connect N2 N1A1
+
+docker network disconnect <network_name> <container_name> --> To disconnect the connection 
+example: 
+docker network connect N2 N1A1
+----------------------------------------------------------------------------------------------------------------
+Assignment:
+1. Docker Swarm
+2. Cgroups and Namespcaes (How they are used by docker)
+----------------------------------------------------------------------------------------------------------------
+06-08-2023 Class - 9
+----------------------------------------------------------------------------------------------------------------
+Multi-stage Build:
+
+Example:1 
+
+FROM alpine as git
+RUN apk update && apk add git
+WORKDIR /app
+RUN git clone https://github.com/OpqTech/java-example.git
+
+FROM maven:amazoncorretto as maven
+COPY --from=git /app/* /usr/app/
+RUN mvn -f /usr/app/pom.xml clean install
+
+FROM mlkrtk/tomcat-final
+COPY --from=maven /usr/app/target/*.war /usr/local/tomcat/webapps/
+
+git : https://github.com/OpqTech/java-example.git
+----------------------------------------------------------------------------------------------------------------
+Example:2
+
+FROM maven:amazoncorretto as stage1
+WORKDIR /app
+COPY . .
+RUN mvn clean install
+
+FROM openjdk:9
+COPY --from=stage1 /app/target/gs-maven-0.1.0.jar /app/app.jar
+CMD ["java", "-jar", "/app/app.jar"]
+
+git : https://github.com/OpqTech/docker-multistagebuild-java.git
+
+----------------------------------------------------------------------------------------------------------------
+Example:3 
+
+FROM maven:amazoncorretto as stage1
+WORKDIR /app
+COPY . .
+RUN mvn clean install
+
+FROM mlkrtk/tomcat-final 
+COPY --from=stage1 /app/target/*.war /usr/local/tomcat/webapps/
+
+git : https://github.com/OpqTech/java-example.git
+
+----------------------------------------------------------------------------------------------------------------
+15-08-2023 Class - 10
+----------------------------------------------------------------------------------------------------------------
+Docker-Compose:
+
+Defualt name: docker-compose.yaml/docker-compose.yml
+
+example 1:
+
+version: "3.9"
+services:
+  app-frontend:
+    image: nginx
+    ports: 
+    - 80:80
+  app-backend: 
+    image: ubuntu
+    volumes:
+    - /home/ubuntu/vol:/home/ubuntu/
+  app-database:
+    image: mongo
+
+example 2:
+
+version: "3.9"
+services:
+  app-frontend:
+    image: nginx
+    ports: 
+    - 80:80
+  app-backend: 
+    build: .
+    volumes:
+    - /home/ubuntu/vol:/home/ubuntu/
+  app-database:
+    image: mongo
+
+----------------------------------------------------------------------------------------------------------------
+commands:
+
+docker-compose up --> To create and start containers
+docker-compose up -d --> To start in background
+docker-compose up -f <file_name> --> To use a specific file 
+docker-compose down --> To stop and remove the containers
+docker-compose ps --> To list the containers managed by docker-compose 
+
+repo link : https://github.com/OpqTech/docker-compose-votingapp.git
+			https://github.com/OpqTech/docker-compose.git
+
+	refer: https://docs.docker.com/compose/compose-file/compose-versioning/ 
+
+----------------------------------------------------------------------------------------------------------------
